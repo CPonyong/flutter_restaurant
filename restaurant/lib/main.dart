@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant/states/create_account.dart';
 import 'package:restaurant/states/login.dart';
+import 'package:restaurant/widgets/bg_theme.dart';
+
+final Map<String, WidgetBuilder> map = {
+  '/login': (context) => Login(),
+  '/createAccount': (context) => CreateAccount(),
+};
+
+String? initRoute;
 
 void main() {
+  initRoute = '/login';
   runApp(const MyApp());
 }
 
@@ -11,13 +21,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-     
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: Login(),
+      debugShowCheckedModeBanner: false,
+      routes: map,
+      initialRoute:  initRoute,
+      title: 'Demo Restaurant',
     );
   }
 }

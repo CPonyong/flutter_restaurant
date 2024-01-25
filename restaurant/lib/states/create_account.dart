@@ -1,44 +1,37 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:restaurant/widgets/bg_theme.dart';
-import 'package:restaurant/widgets/show_image.dart';
+import 'package:restaurant/utility/dialog.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class CreateAccount extends StatefulWidget {
+  const CreateAccount({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<CreateAccount> createState() => _CreateAccountState();
 }
 
-class _LoginState extends State<Login> {
-  bool _passwordVisible = true;
-
-  TextEditingController userController = TextEditingController();
+class _CreateAccountState extends State<CreateAccount> {
+  TextEditingController userNameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  final formKey = GlobalKey<FormState>();
-
-  void _toggleEye() {
-    setState(() {
-      _passwordVisible = !_passwordVisible;
-    });
-  }
-
+  final formField = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     double size = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: Container(
+      appBar: AppBar(
+        backgroundColor: Colors.blueGrey,
+        title: Text('Create Account'),
+      ),
+      body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             child: Form(
-              key: formKey,
+              key: formField,
               child: Column(
                 children: [
-                  loginImage(size),
-                  user(size),
-                  password(size),
-                  loginButton(size),
-                  createAccountBtn(),
+                  userName(size),
+                  passWord(size),
+                  createAccount(size),
                 ],
               ),
             ),
@@ -48,54 +41,68 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Row createAccountBtn() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/createAccount');
-            },
-            child: Text('Create Account'))
-      ],
-    );
-  }
-
-  Container loginButton(double size) {
+  Container createAccount(double size) {
     return Container(
-      width: size * 0.5,
       margin: EdgeInsets.symmetric(vertical: 16),
-      child: ElevatedButton(
+      child: ElevatedButton.icon(
         onPressed: () {
-          if (formKey.currentState!.validate()) {}
+          if (formField.currentState!.validate()) {
+            String name = userNameController.text;
+            String password = passwordController.text;
+          }
         },
-        child: Text('Login'),
+        icon: Icon(Icons.cloud_upload),
+        label: Text('Create Account'),
       ),
     );
   }
 
-  Container password(double size) {
+  Container userName(double size) {
     return Container(
       width: size * 0.5,
+      margin: EdgeInsets.symmetric(vertical: 16),
+      child: TextFormField(
+        controller: userNameController,
+        validator: (value) {
+          if (value!.isEmpty) {
+            return 'Username Connt blank';
+          } else {
+            return null;
+          }
+        },
+        decoration: InputDecoration(
+          label: Text('Username'),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.red),
+          ),
+        ),
+        keyboardType: TextInputType.text,
+      ),
+    );
+  }
+
+  Container passWord(double size) {
+    return Container(
+      width: size * 0.5,
+      margin: EdgeInsets.symmetric(vertical: 16),
       child: TextFormField(
         controller: passwordController,
         validator: (value) {
           if (value!.isEmpty) {
-            return 'Please enter password';
+            return 'Pass word cannt blank';
           } else {
             return null;
           }
         },
-        obscureText: _passwordVisible,
         decoration: InputDecoration(
-          labelText: 'Password',
-          prefixIcon: Icon(Icons.lock),
-          suffixIcon: IconButton(
-            onPressed: () {
-              _toggleEye();
-            },
-            icon: Icon(Icons.remove_red_eye),
-          ),
+          label: Text('Password'),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
           ),
@@ -112,47 +119,15 @@ class _LoginState extends State<Login> {
     );
   }
 
-  Container user(double size) {
-    return Container(
-      width: size * 0.5,
-      margin: EdgeInsets.symmetric(vertical: 16),
-      child: TextFormField(
-        controller: userController,
-        validator: (value) {
-          if (value!.isEmpty) {
-            return 'Please fill username';
-          } else {
-            return null;
-          }
-        },
-        decoration: InputDecoration(
-          labelText: 'User',
-          prefixIcon: IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.account_box_rounded),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colors.red),
-          ),
-        ),
-        keyboardType: TextInputType.text,
-      ),
-    );
-  }
-
-  Container loginImage(double size) {
-    return Container(
-      width: size * 0.5,
-      height: 200,
-      margin: EdgeInsets.symmetric(vertical: 16),
-      child: ShowImage(),
-    );
+  Future<Null> insertNewUser({String? name, String? password}) async {
+    String url = 'http://10.0.2.2:8080/customer/insert';
+    await Dio().get(url).then((value) async {
+      if (value.toString() != 'null') {
+        normalDialog(context, 'User Duplicate', 'Please change user name');
+      } else {
+        String url = 'http://10.0.2.2:8080/customer/insert';
+        await Dio().get(url).then((value) => null);
+      }
+    });
   }
 }
